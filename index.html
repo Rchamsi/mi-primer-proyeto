@@ -11,7 +11,6 @@
             text-align: center;
             padding: 50px;
             overflow: hidden;
-            margin: center;
             height: 100vh;
             width: 100%;
         }
@@ -24,19 +23,19 @@
             justify-content: center;
             align-items: center;
             position: relative;
-            width: 80%;  /* Limitar el ancho del contenedor */
-            height: 80%;  /* Limitar el alto del contenedor */
+            width: 80%;
+            height: 80%;
             margin: 0 auto;
             overflow: hidden;
         }
         .star {
-            width: 120px;  /* Tamaño de las estrellas */
-            height: 120px; /* Tamaño de las estrellas */
+            width: 120px;
+            height: 120px;
             background: url('estrella.png') no-repeat center center;
             background-size: contain;
             cursor: pointer;
             position: absolute;
-            z-index: 1;  /* Asegura que las estrellas estén encima */
+            z-index: 1;
             transition: transform 0.5s ease;
         }
         .star:hover {
@@ -45,15 +44,15 @@
         .message {
             display: none;
             font-size: 18px;
-            color: black;  /* Cambiamos el color del mensaje a negro */
+            color: black;
             font-weight: bold;
             margin-top: 10px;
             animation: fadeIn 0.5s ease-in-out;
             position: center;
-            top: 50%;  /* Centrado vertical */
-            left: 50%;  /* Centrado horizontal */
-            transform: translate(-0%, -0%);  /* Para asegurar el centro exacto */
-            z-index: 2; /* Asegura que el mensaje se muestre encima de las estrellas */
+            top: 50%;
+            left: 50%;
+            transform: translate(-0%, -0%);
+            z-index: 2;
         }
         @keyframes fadeIn {
             from { opacity: 0; transform: scale(0.8); }
@@ -68,141 +67,85 @@
     <script>
         document.addEventListener("click", function() {
             let audio = document.getElementById("background-audio");
-            audio.muted = false;  // Se activa el sonido
+            audio.muted = false;
             audio.play().catch(error => console.log("Error al reproducir el audio:", error));
-        }, { once: true }); // Se ejecuta solo una vez
+        }, { once: true });
     </script>
 
     <div class="container" id="gameContainer"></div>
 
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const audio = document.getElementById("background-audio");
-            audio.play().catch(error => {
-                console.log("Autoplay bloqueado. El usuario debe interactuar primero.");
-            });
-        });
-
         const messages = [
-            "Eres increíble!", 
-            "Sigue brillando ✨", 
-            "Confía en ti 💪", 
-            "Tu sonrisa ilumina el mundo 😊", 
-            "Cada día es una nueva oportunidad 🌱", 
-            "Eres más fuerte de lo que crees ❤️", 
-            "Sueña en grande! 🌟", 
-            "Tu bondad hace la diferencia 💕"
+            "Eres increíble!", "Sigue brillando ✨", "Confía en ti 💪", "Tu sonrisa ilumina el mundo 😊", 
+            "Cada día es una nueva oportunidad 🌱", "Eres más fuerte de lo que crees ❤️", "Sueña en grande! 🌟", 
+            "Tu bondad hace la diferencia 💕", "Eres capaz de lograr todo lo que te propongas 🚀", 
+            "Tu esfuerzo dará grandes frutos 🍀", "No hay límites para ti, solo oportunidades 🌈", 
+            "Tu luz inspira a los demás 🌟", "Nunca dejes de creer en ti mismo/a 💖", 
+            "Los pequeños pasos también te acercan a tus sueños 👣", "Cada día es una nueva oportunidad para brillar ✨", 
+            "Tu autenticidad es tu mayor fortaleza 🌸", "El mundo necesita tu magia ✨", 
+            "Sigue avanzando, lo mejor está por venir 🌎"
         ];
 
         const container = document.getElementById("gameContainer");
-
-        let activeMessage = null;  // Variable para controlar cuál mensaje está visible
-
-        // Definir el número de estrellas y su área de distribución
-        const starCount = 8;
-        const starAreaWidth = container.clientWidth - 150;  // Área más pequeña para las estrellas
-        const starAreaHeight = container.clientHeight - 150; // Similar para el alto
-
-        // Evitar que las estrellas se apilen
-        const positions = [];
-
-        // Generar posiciones únicas y aleatorias para las estrellas
-        function generateUniquePosition() {
-            let x, y, overlap;
-            do {
-                overlap = false;
-                x = Math.random() * starAreaWidth;
-                y = Math.random() * starAreaHeight;
-                for (const pos of positions) {
-                    const dist = Math.sqrt(Math.pow(x - pos.x, 2) + Math.pow(y - pos.y, 2));
-                    if (dist < 150) { // Si están demasiado cerca, generamos nuevas posiciones
-                        overlap = true;
-                        break;
-                    }
-                }
-            } while (overlap);
-            positions.push({ x, y });
-            return { x, y };
-        }
-
-        messages.forEach((msg, index) => {
+        let activeMessage = null;
+        
+        messages.forEach((msg) => {
             const star = document.createElement("div");
             star.classList.add("star");
-
-            // Generar posición única para cada estrella
-            const { x, y } = generateUniquePosition();
-
-            // Asignamos una dirección inicial aleatoria
-            const directionX = Math.random() > 0.5 ? 1 : -1;
-            const directionY = Math.random() > 0.5 ? 1 : -1;
-
-            // Guardamos las propiedades de movimiento
-            star.dataset.directionX = directionX;
-            star.dataset.directionY = directionY;
-
-            // Asignamos posición inicial
+            
+            let x = Math.random() * (container.clientWidth - 150);
+            let y = Math.random() * (container.clientHeight - 150);
+            let directionX = Math.random() > 0.5 ? 1 : -1;
+            let directionY = Math.random() > 0.5 ? 1 : -1;
+            
             star.style.left = `${x}px`;
             star.style.top = `${y}px`;
+            star.dataset.directionX = directionX;
+            star.dataset.directionY = directionY;
 
             const messageDiv = document.createElement("div");
             messageDiv.classList.add("message");
             messageDiv.textContent = msg;
 
-            // Función para mostrar el mensaje al hacer clic en la estrella
             star.onclick = () => {
-                // Ocultar mensaje activo anterior
                 if (activeMessage) {
                     activeMessage.style.display = "none";
                 }
-                // Mostrar el nuevo mensaje en el centro
                 messageDiv.style.display = "block";
                 activeMessage = messageDiv;
-                container.appendChild(messageDiv); // Aseguramos que el mensaje esté en el contenedor
+                container.appendChild(messageDiv);
             };
 
             container.appendChild(star);
         });
 
-        // Animación de flotación y rebote para las estrellas
         function animateStars() {
             const stars = document.querySelectorAll('.star');
             stars.forEach(star => {
-                const rect = star.getBoundingClientRect();
-
-                // Obtener posiciones y direcciones de las estrellas
                 let xPos = parseFloat(star.style.left);
                 let yPos = parseFloat(star.style.top);
                 let directionX = parseFloat(star.dataset.directionX);
                 let directionY = parseFloat(star.dataset.directionY);
-
-                // Cambiar la posición en cada frame para que se muevan de manera fluida
-                xPos += directionX * 0.5; // Cambiar el valor para ajustar la velocidad
+                
+                xPos += directionX * 0.5;
                 yPos += directionY * 0.5;
 
-                // Rebotar las estrellas en los bordes del contenedor
-                if (xPos + rect.width >= container.clientWidth || xPos <= 0) {
-                    directionX = -directionX;  // Cambiar dirección horizontal
+                if (xPos + 120 >= container.clientWidth || xPos <= 0) {
+                    directionX = -directionX;
                 }
-                if (yPos + rect.height >= container.clientHeight || yPos <= 0) {
-                    directionY = -directionY;  // Cambiar dirección vertical
+                if (yPos + 120 >= container.clientHeight || yPos <= 0) {
+                    directionY = -directionY;
                 }
-
-                // Actualizar la posición de la estrella
+                
                 star.style.left = `${xPos}px`;
                 star.style.top = `${yPos}px`;
-
-                // Guardar la nueva dirección
                 star.dataset.directionX = directionX;
                 star.dataset.directionY = directionY;
             });
-
-            requestAnimationFrame(animateStars); // Llamada recursiva para la animación continua
+            requestAnimationFrame(animateStars);
         }
-
-        animateStars(); // Llamar a la función de flotación
+        
+        animateStars();
     </script>
 </body>
 </html>
-
-
-
